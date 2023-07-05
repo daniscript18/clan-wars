@@ -1,0 +1,10 @@
+.vscode/*
+extra/*
+*.amx
+*.exe
+*.dll
+*.so
+pawn/*
+announce
+samp-npc
+samp03svr
