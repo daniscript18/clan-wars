@@ -1,0 +1,6 @@
+hostname = ; dirección del servidor mysql
+username = ; usuario
+password = ; contraseña del usuario
+database = ; nombre de la base de datos
+auto_reconnect = ; auto reconexión si falla (false o true)
+server_port	= ; puerto del servidor mysql (3306 por defecto)

@@ -1,27 +1,12 @@
-# Clan Wars
+# Clan Wars `Beta-1072023637`
 
-Este repositorio se trata de un proyecto de uso libre que se estará desarrollando de manera comunitaria, es una modalidad muy interesante de SA-MP donde clanes/grupos se enfrentan entre sí para ganar puntos. El propósito de este proyecto es demostrar que la comunidad de SA-MP aún está activa y que entre todos podemos realizar grandes cosas.
+Se trata de una modalidad donde equipos se enfrentarán entre si para obtener puntos y ganar rondas, el equipo que logre ganar más rondas ganará la partida. Los administradores podrán establecer las normas de las partidas, la modalidad funciona en mundos por lo tanto cada mundo podrá tener un administrador lo cual significa que cada mundo podrá tener sus propias reglas y propios equipos, se podrá contar con la posibilidad de jugar en varios mundos, es decir, en cada mundo podrá haber un combate diferente a la vez.
 
-- [`compiler-windows-linux`](https://github.com/daniscript18/clan-wars/releases/latest) — *Compilador* — **Windows/Linux**
-    - `.vscode` — *Carpeta*
-        - `settings.json` — *Archivo*
-        - `tasks.json` — *Archivo*
-    - `pawn` — *Carpeta*
-        - `include` — *Carpeta*
-        - `libpawnc.so` — *Archivo*
-        - `pawnc.dll` — *Archivo*
-        - `pawnc.pdb` — *Archivo*
-        - `pawncc` — *Archivo*
-        - `pawncc.exe` — *Archivo*
-        - `pawncc.pdb` — *Archivo*
-        - `pawndisasm` — *Archivo*
-        - `pawndisasm.exe` — *Archivo*
-        - `pawndisasm.pdb` — *Archivo*
+El `compilador` es necesario para poder ejecutar la compilación de los archivos `.pwn` mientras que los `extras` serán archivos y librerías que necesitarás para poder encender el servidor, como `samp-server.exe` y archivos `.dll` o `.so` en caso de linux, es necesario descargar el archivo para la plataforma correspondiente, si ejecutarás el servidor en linux descarga el que diga `...-linux` o `...-windows` si es el caso.
 
-- [`lib-windows-linux`](https://github.com/daniscript18/clan-wars/releases/latest) — *Librerías* — **Windows/Linux**
-    - `announce` — *Archivo*
-    - `announce.exe` — *Archivo*
-    - `samp-npc` — *Archivo*
-    - `samp-npc.exe` — *Archivo*
-    - `samp-server.exe` — *Archivo*
-    - `samp03svr` — *Archivo*
+- [`compilador-windows`](https://github.com/daniscript18/clan-wars/releases/latest)
+- [`compilador-linux`](https://github.com/daniscript18/clan-wars/releases/latest)
+- [`extras-windows`](https://github.com/daniscript18/clan-wars/releases/latest)
+- [`extras-linux`](https://github.com/daniscript18/clan-wars/releases/latest)
+
+Puedes estar al día en el servidor de [Discord](https://discord.gg/Y2E93WFpB6)

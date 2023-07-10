@@ -1,10 +1,21 @@
-.vscode/*
-extra/*
+# REGISTROS
+
+crashinfo.txt
+server_log.txt
+logs/*
+
+# EXTRA
+
 *.amx
-*.exe
 *.dll
 *.so
-pawn/*
-announce
-samp-npc
-samp03svr
+
+extra/*
+compiler/*
+plugins/*
+
+announce*
+samp-npc*
+samp-server*
+
+mysql.ini

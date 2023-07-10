@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cppvsdbg",
+            "request": "launch",
+            "name": "Launch",
+            "windows": {
+                "program": "${workspaceFolder}\\samp-server.exe"
+            },
+            "linux": {
+                "program": "${workspaceFolder}/samp-server",
+            },
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        }
+    ]
+}
