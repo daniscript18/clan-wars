@@ -13,7 +13,8 @@ enum E_PLAYER_INFO {
     pPassword[18],
     pAdmin,
 
-    pWorld
+    pWorld,
+    pTeam
 };
 
 new PlayerInfo[MAX_PLAYERS][E_PLAYER_INFO];
@@ -26,6 +27,7 @@ ClearPlayer(playerid) {
     PlayerInfo[playerid][pAdmin] = ADMIN_LEVEL_NONE;
     
     PlayerInfo[playerid][pWorld] = -1;
+    PlayerInfo[playerid][pTeam] = -1;
     return true;
 }
 

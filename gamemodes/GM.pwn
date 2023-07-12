@@ -11,7 +11,8 @@ enum _:E_DIALOGS {
     DIALOG_NO_USE,
     DIALOG_LOGIN,
     DIALOG_REGISTER,
-    DIALOG_WORLDS
+    DIALOG_WORLDS,
+    DIALOG_TEAMS
 };
 
 new MySQL:Database;
@@ -19,6 +20,48 @@ new MySQL:Database;
 #include "Modules/Players.pwn"
 #include "Modules/Worlds.pwn"
 #include "Modules/Commands.pwn"
+
+GivePlayerWeaponEx(playerid) {
+    if(PlayerInfo[playerid][pTeam] == WORLD_TEAM_SPECTATOR) return false;
+    new weaponId = WorldInfo[PlayerInfo[playerid][pWorld]][wWeapons];
+    ResetPlayerWeapons(playerid);
+    if(WeaponInfo[weaponId][wWeapon1] != -1) GivePlayerWeapon(playerid, WeaponInfo[weaponId][wWeapon1], WeaponInfo[weaponId][wAmmo1]);
+    if(WeaponInfo[weaponId][wWeapon2] != -1) GivePlayerWeapon(playerid, WeaponInfo[weaponId][wWeapon2], WeaponInfo[weaponId][wAmmo2]);
+    if(WeaponInfo[weaponId][wWeapon3] != -1) GivePlayerWeapon(playerid, WeaponInfo[weaponId][wWeapon3], WeaponInfo[weaponId][wAmmo3]);
+    if(WeaponInfo[weaponId][wWeapon4] != -1) GivePlayerWeapon(playerid, WeaponInfo[weaponId][wWeapon4], WeaponInfo[weaponId][wAmmo4]);
+    return true;
+}
+
+SpawnPlayerEx(playerid) {
+    new worldId = PlayerInfo[playerid][pWorld];
+    new mapId = WorldInfo[worldId][wMap];
+    SetPlayerHealth(playerid, 100);
+    switch(PlayerInfo[playerid][pTeam]) {
+        case WORLD_TEAM_SPECTATOR: {
+            SetPlayerSkin(playerid, 124);
+            SetPlayerVirtualWorld(playerid, WorldInfo[worldId][wWorld]);
+            SetPlayerPos(playerid, MapsInfo[mapId][mSpecX], MapsInfo[mapId][mSpecY], MapsInfo[mapId][mSpecZ]);
+            SetPlayerFacingAngle(playerid, MapsInfo[mapId][mSpecA]);
+        }
+        case WORLD_TEAM_ONE: {
+            SetPlayerSkin(playerid, 124);
+            SetPlayerVirtualWorld(playerid, WorldInfo[worldId][wWorld]);
+            SetPlayerPos(playerid, MapsInfo[mapId][mTeamOneX], MapsInfo[mapId][mTeamOneY], MapsInfo[mapId][mTeamOneZ]);
+            SetPlayerFacingAngle(playerid, MapsInfo[mapId][mTeamOneA]);
+            GivePlayerWeaponEx(playerid);
+        }
+        case WORLD_TEAM_TWO: {
+            SetPlayerSkin(playerid, 124);
+            SetPlayerVirtualWorld(playerid, WorldInfo[worldId][wWorld]);
+            SetPlayerPos(playerid, MapsInfo[mapId][mTeamTwoX], MapsInfo[mapId][mTeamTwoY], MapsInfo[mapId][mTeamTwoZ]);
+            SetPlayerFacingAngle(playerid, MapsInfo[mapId][mTeamTwoA]);
+            GivePlayerWeaponEx(playerid);
+        }
+    }
+	
+	SetCameraBehindPlayer(playerid);
+    return true;
+}
 
 public OnGameModeInit() {
     ClearWorlds();
@@ -33,6 +76,7 @@ public OnGameModeInit() {
     }
 
     LoadWorlds();
+    UsePlayerPedAnims();
     return true;
 }
 
@@ -58,11 +102,7 @@ public OnPlayerConnect(playerid) {
 
 public OnPlayerSpawn(playerid)
 {
-	SetPlayerInterior(playerid, 0);
-	SetPlayerPos(playerid, 1958.3783, 1343.1572, 15.3746);
-	SetPlayerFacingAngle(playerid, 270.1425);
-
-	SetCameraBehindPlayer(playerid);
+    SpawnPlayerEx(playerid);
 	return 1;
 }
 
@@ -71,61 +111,50 @@ public OnPlayerDisconnect(playerid, reason) {
     return true;
 }
 
-cmd:user(playerid, params[]) {
-    new Str[512], playerId;
-    if(!sscanf(params, "d", playerId)) {
-        format(Str, sizeof(Str), "PlayerInfo[%d][pId] = %d\n", playerId, PlayerInfo[playerId][pId]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pIp] = %s\n", Str, playerId, PlayerInfo[playerId][pIp]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pUsername] = %s\n", Str, playerId, PlayerInfo[playerId][pUsername]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pPassword] = %s\n", Str, playerId, PlayerInfo[playerId][pPassword]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pAdmin] = %d\n", Str, playerId, PlayerInfo[playerId][pAdmin]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pWorld] = %d", Str, playerId, PlayerInfo[playerId][pWorld]);
-    } else {
-        format(Str, sizeof(Str), "PlayerInfo[%d][pId] = %d\n", playerid, PlayerInfo[playerid][pId]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pIp] = %s\n", Str, playerid, PlayerInfo[playerid][pIp]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pUsername] = %s\n", Str, playerid, PlayerInfo[playerid][pUsername]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pPassword] = %s\n", Str, playerid, PlayerInfo[playerid][pPassword]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pAdmin] = %d\n", Str, playerid, PlayerInfo[playerid][pAdmin]);
-        format(Str, sizeof(Str), "%sPlayerInfo[%d][pWorld] = %d", Str, playerid, PlayerInfo[playerid][pWorld]);
-    }
-    ShowPlayerDialog(playerid, DIALOG_NO_USE, DIALOG_STYLE_TABLIST, " ", Str, "Cerrar", "");
+cmd:createworld(playerid, params[]) {
+    new Result = CreateWorld(), Str[100];
+    format(Str, sizeof(Str), "Se creó un mundo nuevo (%d) usa /addadminworld %d [playerid] [rank] para añadir Admins al mundo.", Result, Result);
+    SendClientMessage(playerid, -1, Str);
     return true;
 }
 
-cmd:world(playerid, params[]) {
-    new Str[512], worldId = PlayerInfo[playerid][pWorld];
-    if(!sscanf(params, "d", worldId)) {
-        format(Str, sizeof(Str), "WorldInfo[%d][wId] = %d\n", worldId, WorldInfo[worldId][wId]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wName] = %s\n", Str, worldId, WorldInfo[worldId][wName]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wPassword] = %s\n", Str, worldId, WorldInfo[worldId][wPassword]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wWorld] = %d\n", Str, worldId, WorldInfo[worldId][wWorld]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wState] = %d\n", Str, worldId, WorldInfo[worldId][wState]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wPrivacy] = %d\n", Str, worldId, WorldInfo[worldId][wPrivacy]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamOneName] = %s\n", Str, worldId, WorldInfo[worldId][wTeamOneName]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamTwoName] = %s\n", Str, worldId, WorldInfo[worldId][wTeamTwoName]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wMaxRounds] = %d\n", Str, worldId, WorldInfo[worldId][wMaxRounds]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wMaxPoints] = %d\n", Str, worldId, WorldInfo[worldId][wMaxPoints]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamOneRounds] = %d\n", Str, worldId, WorldInfo[worldId][wTeamOneRounds]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamTwoRounds] = %d\n", Str, worldId, WorldInfo[worldId][wTeamTwoRounds]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamOnePoints] = %d\n", Str, worldId, WorldInfo[worldId][wTeamOnePoints]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamTwoPoints] = %d", Str, worldId, WorldInfo[worldId][wTeamTwoPoints]);
+cmd:deleteworld(playerid, params[]) {
+    new Result, worldId, Str[100];
+    if(sscanf(params, "d", worldId)) return SendClientMessage(playerid, -1, "Uso correcto: /deleteworld [worldId]");
+    Result = DeleteWorld(worldId);
+    if(Result) format(Str, sizeof(Str), "El mundo %d fue eliminado con éxito.", worldId);
+    else if(!Result) format(Str, sizeof(Str), "El mundo %d no existe.", worldId);
+    SendClientMessage(playerid, -1, Str);
+    return true;
+}
+
+cmd:worlds(playerid, params[]) {
+    new playerId;
+    if(!sscanf(params, "d", playerId) && PlayerInfo[playerid][pAdmin] >= ADMIN_LEVEL_HELPER) {
+        ShowWorlds(playerId);
+        SetPVarInt(playerId, "NoResponseEfect", 1);
     } else {
-        format(Str, sizeof(Str), "WorldInfo[%d][wId] = %d\n", worldId, WorldInfo[worldId][wId]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wName] = %s\n", Str, worldId, WorldInfo[worldId][wName]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wPassword] = %s\n", Str, worldId, WorldInfo[worldId][wPassword]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wWorld] = %d\n", Str, worldId, WorldInfo[worldId][wWorld]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wState] = %d\n", Str, worldId, WorldInfo[worldId][wState]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wPrivacy] = %d\n", Str, worldId, WorldInfo[worldId][wPrivacy]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamOneName] = %s\n", Str, worldId, WorldInfo[worldId][wTeamOneName]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamTwoName] = %s\n", Str, worldId, WorldInfo[worldId][wTeamTwoName]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wMaxRounds] = %d\n", Str, worldId, WorldInfo[worldId][wMaxRounds]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wMaxPoints] = %d\n", Str, worldId, WorldInfo[worldId][wMaxPoints]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamOneRounds] = %d\n", Str, worldId, WorldInfo[worldId][wTeamOneRounds]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamTwoRounds] = %d\n", Str, worldId, WorldInfo[worldId][wTeamTwoRounds]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamOnePoints] = %d\n", Str, worldId, WorldInfo[worldId][wTeamOnePoints]);
-        format(Str, sizeof(Str), "%sWorldInfo[%d][wTeamTwoPoints] = %d", Str, worldId, WorldInfo[worldId][wTeamTwoPoints]);
+        ShowWorlds(playerid);
+        SetPVarInt(playerid, "NoResponseEfect", 1);
     }
-    ShowPlayerDialog(playerid, DIALOG_NO_USE, DIALOG_STYLE_TABLIST, " ", Str, "Cerrar", "");
+    return true;
+}
+
+cmd:teams(playerid, params[]) {
+    new playerId;
+    if(!sscanf(params, "d", playerId) && PlayerInfo[playerid][pAdmin] >= ADMIN_LEVEL_HELPER) {
+        ShowTeams(playerId);
+        SetPVarInt(playerId, "NoResponseEfect", 1);
+    } else {
+        ShowTeams(playerid);
+        SetPVarInt(playerid, "NoResponseEfect", 1);
+    }
+    return true;
+}
+
+public OnPlayerDeath(playerid, killerid, reason) {
+    SpawnPlayer(playerid);
+    SpawnPlayerEx(playerid);
     return true;
 }
 
@@ -165,12 +194,44 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
             }
         }
         case DIALOG_WORLDS: {
-            if(!response) return Kick(playerid);
+            if(!response) {
+                if(GetPVarInt(playerid, "NoResponseEfect") == 1) {
+                    DeletePVar(playerid, "NoResponseEfect");
+                    return true;
+                }
+                else if(GetPVarInt(playerid, "NoResponseEfect") == 0) return Kick(playerid);
+            }
             new worldId = strval(inputtext);
             PlayerInfo[playerid][pWorld] = WorldInfo[worldId][wId];
             SetPlayerVirtualWorld(playerid, WorldInfo[worldId][wWorld]);
-            SetSpawnInfo(playerid, NO_TEAM, 124, 1958.3783, 1343.1572, 15.3746, 270.1425, 0, 0, 0, 0, 0, 0);
-            SpawnPlayer(playerid);
+            ShowTeams(playerid);
+        }
+        case DIALOG_TEAMS: {
+            if(!response) {
+                if(GetPVarInt(playerid, "NoResponseEfect") == 1) {
+                    DeletePVar(playerid, "NoResponseEfect");
+                    return true;
+                }
+                else if(GetPVarInt(playerid, "NoResponseEfect") == 0) return ShowWorlds(playerid);
+            }
+            new mapId = WorldInfo[PlayerInfo[playerid][pWorld]][wMap];
+            switch(listitem) {
+                case WORLD_TEAM_SPECTATOR: {
+                    PlayerInfo[playerid][pTeam] = WORLD_TEAM_SPECTATOR;
+                    SetSpawnInfo(playerid, NO_TEAM, 124, MapsInfo[mapId][mSpecX], MapsInfo[mapId][mSpecY], MapsInfo[mapId][mSpecZ], MapsInfo[mapId][mSpecA], 0, 0, 0, 0, 0, 0);
+                    SpawnPlayer(playerid);
+                }
+                case WORLD_TEAM_ONE: {
+                    PlayerInfo[playerid][pTeam] = WORLD_TEAM_ONE;
+                    SetSpawnInfo(playerid, NO_TEAM, 124, MapsInfo[mapId][mTeamOneX], MapsInfo[mapId][mTeamOneY], MapsInfo[mapId][mTeamOneZ], MapsInfo[mapId][mTeamOneA], 0, 0, 0, 0, 0, 0);
+                    SpawnPlayer(playerid);
+                }
+                case WORLD_TEAM_TWO: {
+                    PlayerInfo[playerid][pTeam] = WORLD_TEAM_TWO;
+                    SetSpawnInfo(playerid, NO_TEAM, 124, MapsInfo[mapId][mTeamTwoX], MapsInfo[mapId][mTeamTwoY], MapsInfo[mapId][mTeamTwoZ], MapsInfo[mapId][mTeamTwoA], 0, 0, 0, 0, 0, 0);
+                    SpawnPlayer(playerid);
+                }
+            }
         }
         default: return false;
     }
