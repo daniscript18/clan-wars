@@ -5,12 +5,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "name": "Launch",
-            "windows": {
-                "program": "${workspaceFolder}\\samp-server.exe"
-            },
-            "linux": {
-                "program": "${workspaceFolder}/samp-server",
-            },
+            "program": "${workspaceFolder}\\samp-server.exe",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         }

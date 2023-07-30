@@ -23,7 +23,8 @@
                     "'-i${workspaceRoot}/includes'",
                     "'-;+'",
                     "'-(+'",
-                    "'-d3'"
+                    "'-d3'",
+                    "'-Z+'"
                 ],
             },
             "isBackground": false,

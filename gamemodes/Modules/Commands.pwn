@@ -19,8 +19,10 @@ public OnPlayerCommandReceived(playerid, cmd[], params[], flags)
 
 flags:createworld(ADMIN_LEVEL_BOSS)
 flags:deleteworld(ADMIN_LEVEL_BOSS)
+flags:world(ADMIN_LEVEL_BOSS)
 
 alias:createworld("crearmundo")
 alias:deleteworld("borrarmundo")
 alias:worlds("mundos", "showworlds", "mostrarmundos")
 alias:teams("equipos", "showteams", "mostrarequipos")
+alias:world("mundo", "worldconfig", "mundoconfiguracion", "mundoconfiguración")

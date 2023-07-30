@@ -28,6 +28,7 @@ ClearPlayer(playerid) {
     
     PlayerInfo[playerid][pWorld] = -1;
     PlayerInfo[playerid][pTeam] = -1;
+    SetPVarInt(playerid, "EnteredPlayer", 0);
     return true;
 }
 
@@ -83,4 +84,10 @@ SavePlayer(playerid) {
     mysql_format(Database, Query, sizeof(Query), "UPDATE `players` SET `Ip` = '%s', `Admin` = %d WHERE `Username` = '%s'", PlayerInfo[playerid][pIp], PlayerInfo[playerid][pAdmin], PlayerInfo[playerid][pUsername]);
     mysql_query(Database, Query, false);
     return true;
+}
+
+GetPlayerNameEx(playerid) {
+    new Name[24];
+    GetPlayerName(playerid, Name, sizeof(Name));
+    return Name;
 }

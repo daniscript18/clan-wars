@@ -3,7 +3,7 @@
 #include <Pawn.CMD>
 #include <sscanf2>
 
-main() {
+main() {                                 
     return true;
 }
 
@@ -12,7 +12,8 @@ enum _:E_DIALOGS {
     DIALOG_LOGIN,
     DIALOG_REGISTER,
     DIALOG_WORLDS,
-    DIALOG_TEAMS
+    DIALOG_TEAMS,
+    DIALOG_CONFIG_WORLD
 };
 
 new MySQL:Database;
@@ -40,21 +41,21 @@ SpawnPlayerEx(playerid) {
         case WORLD_TEAM_SPECTATOR: {
             SetPlayerSkin(playerid, 124);
             SetPlayerVirtualWorld(playerid, WorldInfo[worldId][wWorld]);
-            SetPlayerPos(playerid, MapsInfo[mapId][mSpecX], MapsInfo[mapId][mSpecY], MapsInfo[mapId][mSpecZ]);
-            SetPlayerFacingAngle(playerid, MapsInfo[mapId][mSpecA]);
+            SetPlayerPos(playerid, MapInfo[mapId][mSpecX], MapInfo[mapId][mSpecY], MapInfo[mapId][mSpecZ]);
+            SetPlayerFacingAngle(playerid, MapInfo[mapId][mSpecA]);
         }
         case WORLD_TEAM_ONE: {
             SetPlayerSkin(playerid, 124);
             SetPlayerVirtualWorld(playerid, WorldInfo[worldId][wWorld]);
-            SetPlayerPos(playerid, MapsInfo[mapId][mTeamOneX], MapsInfo[mapId][mTeamOneY], MapsInfo[mapId][mTeamOneZ]);
-            SetPlayerFacingAngle(playerid, MapsInfo[mapId][mTeamOneA]);
+            SetPlayerPos(playerid, MapInfo[mapId][mTeamOneX], MapInfo[mapId][mTeamOneY], MapInfo[mapId][mTeamOneZ]);
+            SetPlayerFacingAngle(playerid, MapInfo[mapId][mTeamOneA]);
             GivePlayerWeaponEx(playerid);
         }
         case WORLD_TEAM_TWO: {
             SetPlayerSkin(playerid, 124);
             SetPlayerVirtualWorld(playerid, WorldInfo[worldId][wWorld]);
-            SetPlayerPos(playerid, MapsInfo[mapId][mTeamTwoX], MapsInfo[mapId][mTeamTwoY], MapsInfo[mapId][mTeamTwoZ]);
-            SetPlayerFacingAngle(playerid, MapsInfo[mapId][mTeamTwoA]);
+            SetPlayerPos(playerid, MapInfo[mapId][mTeamTwoX], MapInfo[mapId][mTeamTwoY], MapInfo[mapId][mTeamTwoZ]);
+            SetPlayerFacingAngle(playerid, MapInfo[mapId][mTeamTwoA]);
             GivePlayerWeaponEx(playerid);
         }
     }
@@ -64,18 +65,22 @@ SpawnPlayerEx(playerid) {
 }
 
 public OnGameModeInit() {
+    ClearMaps();
+    ClearWeapons();
     ClearWorlds();
 
     mysql_log(ALL);
     Database = mysql_connect_file();
-    if(mysql_errno(Database) == 0) {
-        print("Base de datos conectada.");
-    } else {
+    if(mysql_errno(Database) == 0) print("Base de datos conectada.");
+    else {
         print("No se pudo conectar a la base de datos.");
-        SendRconCommand("exit");
+        return SendRconCommand("exit");
     }
 
+    LoadMaps();
+    LoadWeapons();
     LoadWorlds();
+
     UsePlayerPedAnims();
     return true;
 }
@@ -94,6 +99,7 @@ public OnGameModeExit() {
 public OnPlayerConnect(playerid) {
     new Query[80];
     ClearPlayer(playerid);
+    SetPlayerColor(playerid, -1);
     GetPlayerName(playerid, PlayerInfo[playerid][pUsername], 24);
     mysql_format(Database, Query, sizeof(Query), "SELECT * FROM `players` WHERE `Username` = '%s' LIMIT 1", PlayerInfo[playerid][pUsername]);
     mysql_tquery(Database, Query, "ExistPlayer", "d", playerid);
@@ -102,8 +108,51 @@ public OnPlayerConnect(playerid) {
 
 public OnPlayerSpawn(playerid)
 {
+    if(GetPVarInt(playerid, "EnteredPlayer") == 0) SetPVarInt(playerid, "EnteredPlayer", 1);
     SpawnPlayerEx(playerid);
 	return 1;
+}
+
+WorldChat(playerid, const text[]) {
+    new Str[512];
+    if(text[0] == '!') format(Str, sizeof(Str), "%s: %s", GetPlayerNameEx(playerid), text[1]);
+    else format(Str, sizeof(Str), "%s: %s", GetPlayerNameEx(playerid), text);
+    for(new i = 0; i < MAX_PLAYERS; i++) {
+        if(IsPlayerConnected(i) && PlayerInfo[i][pWorld] == PlayerInfo[playerid][pWorld]) {
+            SendClientMessage(i, -1, Str);
+        }
+    }
+    return false;
+}
+
+TeamChat(playerid, const text[]) {
+    new Str[512];
+    if(text[0] == '#') format(Str, sizeof(Str), "%s: %s", GetPlayerNameEx(playerid), text[1]);
+    else format(Str, sizeof(Str), "%s: %s", GetPlayerNameEx(playerid), text);
+    for(new i = 0; i < MAX_PLAYERS; i++) {
+        if(IsPlayerConnected(i) && PlayerInfo[i][pWorld] == PlayerInfo[playerid][pWorld] && PlayerInfo[i][pTeam] == PlayerInfo[playerid][pTeam]) {
+            SendClientMessage(i, -1, Str);
+        }
+    }
+    return false;
+}
+
+public OnPlayerText(playerid, text[])
+{
+    if(GetPVarInt(playerid, "EnteredPlayer") == 0 ||
+       PlayerInfo[playerid][pWorld] <= 0 ||
+       PlayerInfo[playerid][pTeam] <= 0)
+    return SendClientMessage(playerid, -1, "No puedes usar el chat en estos momentos.");
+
+    if(text[0] == '!') return WorldChat(playerid, text);
+    else if(text[0] == '#') return TeamChat(playerid, text);
+    else return WorldChat(playerid, text);
+}
+
+public OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
+{
+    PlayerPlaySound(issuerid, 17802, 0.0, 0.0, 0.0);
+    return true;
 }
 
 public OnPlayerDisconnect(playerid, reason) {
@@ -111,9 +160,9 @@ public OnPlayerDisconnect(playerid, reason) {
     return true;
 }
 
-cmd:createworld(playerid, params[]) {
+cmd:createworld(playerid) {
     new Result = CreateWorld(), Str[100];
-    format(Str, sizeof(Str), "Se creó un mundo nuevo (%d) usa /addadminworld %d [playerid] [rank] para añadir Admins al mundo.", Result, Result);
+    format(Str, sizeof(Str), "Se creó un mundo nuevo (%d)", Result);
     SendClientMessage(playerid, -1, Str);
     return true;
 }
@@ -125,6 +174,16 @@ cmd:deleteworld(playerid, params[]) {
     if(Result) format(Str, sizeof(Str), "El mundo %d fue eliminado con éxito.", worldId);
     else if(!Result) format(Str, sizeof(Str), "El mundo %d no existe.", worldId);
     SendClientMessage(playerid, -1, Str);
+    return true;
+}
+
+cmd:world(playerid, params[]) {
+    new playerId;
+    if(!sscanf(params, "d", playerId) && PlayerInfo[playerid][pAdmin] >= ADMIN_LEVEL_HELPER) {
+        ShowConfigWorld(playerId);
+    } else {
+        ShowConfigWorld(playerid);
+    }
     return true;
 }
 
@@ -154,7 +213,6 @@ cmd:teams(playerid, params[]) {
 
 public OnPlayerDeath(playerid, killerid, reason) {
     SpawnPlayer(playerid);
-    SpawnPlayerEx(playerid);
     return true;
 }
 
@@ -218,20 +276,24 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]) {
             switch(listitem) {
                 case WORLD_TEAM_SPECTATOR: {
                     PlayerInfo[playerid][pTeam] = WORLD_TEAM_SPECTATOR;
-                    SetSpawnInfo(playerid, NO_TEAM, 124, MapsInfo[mapId][mSpecX], MapsInfo[mapId][mSpecY], MapsInfo[mapId][mSpecZ], MapsInfo[mapId][mSpecA], 0, 0, 0, 0, 0, 0);
+                    SetSpawnInfo(playerid, NO_TEAM, 124, MapInfo[mapId][mSpecX], MapInfo[mapId][mSpecY], MapInfo[mapId][mSpecZ], MapInfo[mapId][mSpecA], 0, 0, 0, 0, 0, 0);
                     SpawnPlayer(playerid);
                 }
                 case WORLD_TEAM_ONE: {
                     PlayerInfo[playerid][pTeam] = WORLD_TEAM_ONE;
-                    SetSpawnInfo(playerid, NO_TEAM, 124, MapsInfo[mapId][mTeamOneX], MapsInfo[mapId][mTeamOneY], MapsInfo[mapId][mTeamOneZ], MapsInfo[mapId][mTeamOneA], 0, 0, 0, 0, 0, 0);
+                    SetSpawnInfo(playerid, NO_TEAM, 124, MapInfo[mapId][mTeamOneX], MapInfo[mapId][mTeamOneY], MapInfo[mapId][mTeamOneZ], MapInfo[mapId][mTeamOneA], 0, 0, 0, 0, 0, 0);
                     SpawnPlayer(playerid);
                 }
                 case WORLD_TEAM_TWO: {
                     PlayerInfo[playerid][pTeam] = WORLD_TEAM_TWO;
-                    SetSpawnInfo(playerid, NO_TEAM, 124, MapsInfo[mapId][mTeamTwoX], MapsInfo[mapId][mTeamTwoY], MapsInfo[mapId][mTeamTwoZ], MapsInfo[mapId][mTeamTwoA], 0, 0, 0, 0, 0, 0);
+                    SetSpawnInfo(playerid, NO_TEAM, 124, MapInfo[mapId][mTeamTwoX], MapInfo[mapId][mTeamTwoY], MapInfo[mapId][mTeamTwoZ], MapInfo[mapId][mTeamTwoA], 0, 0, 0, 0, 0, 0);
                     SpawnPlayer(playerid);
                 }
             }
+        }
+        case DIALOG_CONFIG_WORLD: {
+            if(!response) return true;
+            return true;
         }
         default: return false;
     }
