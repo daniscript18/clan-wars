@@ -1,10 +1,7 @@
-# REGISTROS
-
 crashinfo.txt
 server_log.txt
 logs/*
 
-# EXTRA
 
 *.amx
 *.dll
@@ -19,3 +16,5 @@ samp-npc*
 samp-server*
 
 mysql.ini
+
+notes/*

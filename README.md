@@ -1,4 +1,4 @@
-# Clan Wars `Beta-290720231928`
+# Clan Wars `Beta-040820231945`
 
 Se trata de una modalidad donde equipos se enfrentarán entre si para obtener puntos y ganar rondas, el equipo que logre ganar más rondas ganará la partida. Los administradores podrán establecer las normas de las partidas, la modalidad funciona en mundos por lo tanto cada mundo podrá tener un administrador lo cual significa que cada mundo podrá tener sus propias reglas y propios equipos, se podrá contar con la posibilidad de jugar en varios mundos, es decir, en cada mundo podrá haber un combate diferente a la vez.
 
@@ -10,14 +10,16 @@ El `compilador` es necesario para poder ejecutar la compilación de los archivos 
 - [`extras-linux`](https://github.com/daniscript18/clan-wars/releases)
 - [`base-de-datos`](https://github.com/daniscript18/clan-wars/releases)
 
+Mira más información en la [wiki](https://github.com/daniscript18/clan-wars/wiki).
+
 ## Avances
 
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128522773736734850/image.png?width=631&height=473)
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128523116059033610/image.png?width=631&height=473)
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128523547317391380/image.png?width=631&height=473)
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128523912658038896/image.png?width=631&height=473)
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128523983533383730/image.png?width=588&height=94)
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128524073492820028/image.png?width=160&height=103)
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128524309887983666/image.png?width=282&height=99)
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128524189956046899/image.png?width=573&height=473)
-![image](https://media.discordapp.net/attachments/1125967609377063025/1128524503899721809/image.png?width=575&height=473)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1136729684810416128/sa-mp-010.png?width=768&height=450)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1136729948934115379/sa-mp-011.png?width=768&height=450)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1136729977069506560/sa-mp-012.png?width=768&height=450)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1136730012742066287/sa-mp-013.png?width=768&height=450)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1136730364069552198/sa-mp-014.png?width=768&height=450)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1136830736322809927/sa-mp-016.png?width=768&height=450)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1136830768774123531/sa-mp-017.png?width=768&height=450)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1137051506353373184/sa-mp-018.png?width=768&height=450)
+![image](https://media.discordapp.net/attachments/1125967609377063025/1137051532597149706/sa-mp-019.png?width=768&height=450)

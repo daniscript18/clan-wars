@@ -115,7 +115,7 @@ native GetPlayerFightingStyle(playerid);
 native SetPlayerVelocity(playerid, Float:X, Float:Y, Float:Z);
 native GetPlayerVelocity( playerid, &Float:X, &Float:Y, &Float:Z );
 native PlayCrimeReportForPlayer(playerid, suspectid, crime);
-native PlayAudioStreamForPlayer(playerid, url[], Float:posX = 0.0, Float:posY = 0.0, Float:posZ = 0.0, Float:distance = 50.0, usepos = 0);
+native PlayAudioStreamForPlayer(playerid, const url[], Float:posX = 0.0, Float:posY = 0.0, Float:posZ = 0.0, Float:distance = 50.0, usepos = 0);
 native StopAudioStreamForPlayer(playerid);
 native SetPlayerShopName(playerid, shopname[]);
 native SetPlayerSkillLevel(playerid, skill, level);

@@ -614,18 +614,57 @@ ShowTeams(playerid) {
     return ShowPlayerDialog(playerid, DIALOG_TEAMS, DIALOG_STYLE_TABLIST_HEADERS, "Equipos disponibles", Str, "Entrar", "Atrás");
 }
 
-ShowConfigWorld(playerid) {
-    new Str[356], Password[18], worldId = PlayerInfo[playerid][pWorld], weaponId = WorldInfo[worldId][wWeapons], mapId = WorldInfo[worldId][wMap];
+ShowConfigWorldWeapons(playerid) {
+    new Query[128], worldId = PlayerInfo[playerid][pWorld], Str[356];
+    format(Str, sizeof(Str), "Id\tNombre\tArmas\n");
+    mysql_format(Database, Query, sizeof(Query), "SELECT * FROM `weapons` WHERE `World` = %d", worldId);
+    mysql_query(Database, Query);
+    for(new i = 0; i < cache_num_rows(); i++) {
+        new weaponId, weapons = 0;
+        cache_get_value_name_int(i, "Id", weaponId);
+        if(WeaponInfo[weaponId][wWeapon1] != -1) weapons++;
+        if(WeaponInfo[weaponId][wWeapon2] != -1) weapons++;
+        if(WeaponInfo[weaponId][wWeapon3] != -1) weapons++;
+        if(WeaponInfo[weaponId][wWeapon4] != -1) weapons++;
+        format(Str, sizeof(Str), "%s%d\t%s\t%d\n", Str, weaponId, WeaponInfo[weaponId][wName], weapons);
+    }
+    return ShowPlayerDialog(playerid, DIALOG_CONFIG_WORLD_WEAPONS, DIALOG_STYLE_TABLIST_HEADERS, "Configuración del mundo - Armas", Str, "Seleccionar", "Atrás");
+}
+
+ShowConfigWorldMaps(playerid) {
+    new Query[128], worldId = PlayerInfo[playerid][pWorld], Str[356];
+    format(Str, sizeof(Str), "Id\tNombre\n");
+    mysql_format(Database, Query, sizeof(Query), "SELECT * FROM `maps` WHERE `World` = %d", worldId);
+    mysql_query(Database, Query);
+    for(new i = 0; i < cache_num_rows(); i++) {
+        new mapId;
+        cache_get_value_name_int(i, "Id", mapId);
+        format(Str, sizeof(Str), "%s%d\t%s\n", Str, mapId, MapInfo[mapId][mName]);
+    }
+    return ShowPlayerDialog(playerid, DIALOG_CONFIG_WORLD_MAPS, DIALOG_STYLE_TABLIST_HEADERS, "Configuración del mundo - Mapas", Str, "Seleccionar", "Atrás");
+}
+
+ShowConfigWorld(playerid, worldId = -1) {
+    if(worldId == -1) worldId = PlayerInfo[playerid][pWorld];
+    new Str[356], Password[18], weaponId = WorldInfo[worldId][wWeapons], mapId = WorldInfo[worldId][wMap];
     for(new i = 0; i < strlen(WorldInfo[worldId][wPassword]); i++) format(Password, sizeof(Password), "%s*", Password);
     format(Str, sizeof(Str), "Opción\tValor\n");
     format(Str, sizeof(Str), "%sNombre\t%s\n", Str, WorldInfo[worldId][wName]);
     format(Str, sizeof(Str), "%sContraseña\t%s\n", Str, Password);
     format(Str, sizeof(Str), "%sPrivacidad\t%s\n", Str, WorldPrivacy[WorldInfo[worldId][wPrivacy]]);
-    format(Str, sizeof(Str), "%sEquipo Uno\t%s\n", Str, WorldInfo[worldId][wTeamOneName]);
-    format(Str, sizeof(Str), "%sEquipo Dos\t%s\n", Str, WorldInfo[worldId][wTeamTwoName]);
-    format(Str, sizeof(Str), "%sRondas Máximas\t%d\n", Str, WorldInfo[worldId][wMaxRounds]);
-    format(Str, sizeof(Str), "%sPuntos Máximos\t%d\n", Str, WorldInfo[worldId][wMaxPoints]);
+    format(Str, sizeof(Str), "%sEquipo uno\t%s\n", Str, WorldInfo[worldId][wTeamOneName]);
+    format(Str, sizeof(Str), "%sEquipo dos\t%s\n", Str, WorldInfo[worldId][wTeamTwoName]);
+    format(Str, sizeof(Str), "%sRondas máximas\t%d\n", Str, WorldInfo[worldId][wMaxRounds]);
+    format(Str, sizeof(Str), "%sPuntos máximos\t%d\n", Str, WorldInfo[worldId][wMaxPoints]);
     format(Str, sizeof(Str), "%sArmas\t%s\n", Str, WeaponInfo[weaponId][wName]);
     format(Str, sizeof(Str), "%sMapa\t%s\n", Str, MapInfo[mapId][mName]);
-    return ShowPlayerDialog(playerid, DIALOG_CONFIG_WORLD, DIALOG_STYLE_TABLIST_HEADERS, "Configuración del mundo", Str, "Entrar", "Salir");
+    return ShowPlayerDialog(playerid, DIALOG_CONFIG_WORLD, DIALOG_STYLE_TABLIST_HEADERS, "Configuración del mundo", Str, "Editar", "Salir");
+}
+
+ExistWorld(worldId) {
+    new Query[128];
+    mysql_format(Database, Query, sizeof(Query), "SELECT * FROM `worlds` WHERE `Id` = %d", worldId);
+    mysql_query(Database, Query);
+    if(cache_num_rows() != 0) return true;
+    return false;
 }
