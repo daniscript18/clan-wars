@@ -1,0 +1,50 @@
+name: Compile
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+
+jobs:
+  pawn-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile gamemode
+        shell: pwsh
+        run: |
+          & .\compiler\pawncc.exe `
+            "$PWD\gamemodes\GM.pwn" `
+            "-D$PWD\gamemodes" `
+            "-i$PWD\includes" `
+            '-;+' `
+            '-(+' `
+            '-d3' `
+            '-Z+'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify AMX
+        shell: pwsh
+        run: |
+          if (-not (Test-Path .\gamemodes\GM.amx)) {
+            throw 'GM.amx was not generated.'
+          }
+
+  pawn-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile gamemode
+        shell: bash
+        run: |
+          chmod +x ./compiler/pawncc
+          ./compiler/pawncc \
+            "$PWD/gamemodes/GM.pwn" \
+            "-D$PWD/gamemodes" \
+            "-i$PWD/includes" \
+            '-;+' \
+            '-(+' \
+            '-d3' \
+            '-Z+'
+      - name: Verify AMX
+        shell: bash
+        run: test -f ./gamemodes/GM.amx

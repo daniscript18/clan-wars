@@ -1,0 +1,12 @@
+* text=auto
+*.pwn text eol=lf
+*.inc text eol=lf
+*.sql text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.bat text eol=crlf
+*.dll binary
+*.so binary
+*.exe binary
+*.amx binary

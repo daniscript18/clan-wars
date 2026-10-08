@@ -1,0 +1,6 @@
+hostname = 127.0.0.1
+username = clan_wars
+password = change_me
+database = clan_wars
+auto_reconnect = true
+server_port = 3306

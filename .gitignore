@@ -1,0 +1,23 @@
+# Local AI/agent instructions (never versioned)
+.ai/
+AGENTS.md
+
+# Secrets / local runtime
+mysql.ini
+server_log.txt
+mysql_log.txt
+server_crash.txt
+*.log
+
+# Build output
+gamemodes/*.amx
+*.asm
+*.lst
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*.local.json
+
+# Partial downloads
+*.crdownload

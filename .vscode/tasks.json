@@ -1,0 +1,43 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compile",
+      "type": "process",
+      "windows": {
+        "command": "${workspaceFolder}\\compiler\\pawncc.exe",
+        "args": [
+          "${workspaceFolder}\\gamemodes\\GM.pwn",
+          "-D${workspaceFolder}\\gamemodes",
+          "-i${workspaceFolder}\\includes",
+          "-;+",
+          "-(+",
+          "-d3",
+          "-Z+"
+        ]
+      },
+      "linux": {
+        "command": "${workspaceFolder}/compiler/pawncc",
+        "args": [
+          "${workspaceFolder}/gamemodes/GM.pwn",
+          "-D${workspaceFolder}/gamemodes",
+          "-i${workspaceFolder}/includes",
+          "-;+",
+          "-(+",
+          "-d3",
+          "-Z+"
+        ]
+      },
+      "problemMatcher": "$pawncc",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    }
+  ]
+}
