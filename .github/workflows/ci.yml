@@ -5,14 +5,51 @@ on:
     branches: ["main", "master", "develop"]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: compile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pawn-windows:
-    runs-on: windows-latest
+    name: Pawn / Windows
+    runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Pawn compiler runtime
+        shell: pwsh
+        run: |
+          $runtime = Join-Path $env:WINDIR 'SysWOW64\msvcr100.dll'
+
+          if (-not (Test-Path $runtime)) {
+            choco install vcredist2010 `
+              --version=10.0.40219.32503 `
+              --yes `
+              --no-progress `
+              --limit-output
+
+            $chocoExitCode = $LASTEXITCODE
+            if ($chocoExitCode -notin @(0, 1641, 3010)) {
+              throw "vcredist2010 installation failed with exit code $chocoExitCode."
+            }
+          }
+
+          if (-not (Test-Path $runtime)) {
+            throw "MSVCR100.dll is unavailable after installing the Visual C++ 2010 runtime."
+          }
+
+          Write-Host "Visual C++ 2010 x86 runtime available at $runtime"
+          exit 0
+
       - name: Compile gamemode
         shell: pwsh
         run: |
+          Remove-Item .\gamemodes\GM.amx -Force -ErrorAction SilentlyContinue
+
           & .\compiler\pawncc.exe `
             "$PWD\gamemodes\GM.pwn" `
             "-D$PWD\gamemodes" `
@@ -21,7 +58,12 @@ jobs:
             '-(+' `
             '-d3' `
             '-Z+'
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $compilerExitCode = $LASTEXITCODE
+          if ($compilerExitCode -ne 0) {
+            throw "Pawn compiler failed with exit code $compilerExitCode."
+          }
+
       - name: Verify AMX
         shell: pwsh
         run: |
@@ -30,13 +72,18 @@ jobs:
           }
 
   pawn-linux:
-    runs-on: ubuntu-latest
+    name: Pawn / Linux
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: Compile gamemode
         shell: bash
         run: |
+          set -euo pipefail
           chmod +x ./compiler/pawncc
+          rm -f ./gamemodes/GM.amx
           ./compiler/pawncc \
             "$PWD/gamemodes/GM.pwn" \
             "-D$PWD/gamemodes" \
@@ -45,6 +92,7 @@ jobs:
             '-(+' \
             '-d3' \
             '-Z+'
+
       - name: Verify AMX
         shell: bash
         run: test -f ./gamemodes/GM.amx

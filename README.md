@@ -55,6 +55,10 @@ Linux:
 
 A change is not ready while project compiler errors/warnings remain.
 
+### Windows compiler runtime
+
+The bundled Windows Pawn 3.10.10 compiler is an x86 executable linked against `MSVCR100.dll`. Fresh Windows environments need the x86 Microsoft Visual C++ 2010 SP1 runtime. GitHub Actions installs and verifies that runtime before compiling; local Windows machines only need this step if `pawncc.exe` cannot start because the DLL/runtime is missing.
+
 ## Documentation
 
 The sibling `../wiki/` repository is the canonical human-facing documentation. Every server change must update `../wiki/Changelog.md` and any affected topical wiki pages in the same task.
